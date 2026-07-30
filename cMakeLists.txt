@@ -1,0 +1,63 @@
+################################################################################
+ # @file CMakeLists.txt
+ # @brief CMake configuration for the cIntegrityDriver library.
+ #
+ # This file sets up the build configuration for the cIntegrityDriver library using CMake.
+ # It specifies the minimum required CMake version, project name, version, and language.
+ # It also defines the C++ standard to be used and creates an interface library target.
+ #
+ # Usage:
+    #   1. Create a build directory: mkdir build
+    #   2. Navigate to the build directory: cd build
+    #   3. Generate build files: cmake ..
+    #   4. Build the project: cmake --build .
+    #   5. Run the executable: ./Executable
+    #   6. To only build the library: cmake --build . --target cIntegrityDriverLib
+    #   7. Executable is located in build\app\Debug>
+    #   8. Google Test executable is located in build\cIntegrityDriverLib\Debug>
+    #   9. Library is located in build\cIntegrityDriverLib\Debug>
+    #  10. to run the tests execute cIntegrityDriverTest.exe --gtest_color=yes
+########################################################################################
+cmake_minimum_required(VERSION 3.31)
+
+project(IntegrityDriver VERSION 1.0.0 LANGUAGES C CXX)
+
+set ( CMAKE_CXX_STANDARD 14)
+set ( CMAKE_CXX_STANDARD_REQUIRED ON )
+set ( CMAKE_CXX_EXTENSIONS ON )
+
+set ( COMPILE_INTEGRITY_DRIVER_LIBRARY_STATIC ON )
+set ( INTEGRITY_DRIVER_LIBRARY_NAME cIntegrityDriver )
+set ( EXECUTABLE_NAME cIntegrityDriverDevApp )
+set ( UNIT_TESTS ON )
+
+option(COMPILE_EXECUTABLE "Whether to compile the executable" ON)
+
+# Bring in shared interface libraries so usage requirements propagate.
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cCommonMacros ${CMAKE_CURRENT_BINARY_DIR}/cCommonMacros)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cCommonTypes ${CMAKE_CURRENT_BINARY_DIR}/cCommonTypes)
+
+add_subdirectory(cIntegrityDriverLib)
+
+if( UNIT_TESTS )
+    include(FetchContent)
+
+    FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    URL_HASH SHA256=EDD885A1AB32B6999515A880F669EFADB80B3F880215F315985FA3F6ECA7C4D3
+    )
+
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
+
+
+if( COMPILE_EXECUTABLE )
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/app/CMakeLists.txt)
+        add_subdirectory(app)
+    endif()
+else()
+    message("W/o exe. compiling ")
+endif()

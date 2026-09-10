@@ -7,6 +7,8 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <cstdarg>   // va_list, va_start, va_end
+#include <cstdio>    // vsnprintf
 #include "commonMacros.h"
 #include "cIntegrityDriverPub.h"
 
@@ -64,15 +66,49 @@ static uint16_t fakeWriteMemory( uint32_t address, uint8_t * value, size_t write
     return 0;
 }
 
-static sErrorCompact_t fakeLogCallback(uint16_t moduleId,
-                                         uint16_t line,
-                                         eLoggingType_t type,
-                                         const char *message, ...)
+
+static sErrorCompact_t fakeLogCallback( uint16_t moduleId,
+                                 uint16_t line,
+                                 eLoggingType_t type,
+                                 const char *message, ... )
 {
-    sErrorCompact_t errorInfo = BLANK_ERROR_STRUCT;
-    errorInfo._errorCode = ERROR_NONE;
-    return errorInfo;
+    char buffer[256];
+
+    va_list args;
+    va_start( args, message );          // start reading args right after 'message'
+    vsnprintf( buffer, sizeof(buffer), message, args );  // does the %d/%s/etc. substitution
+    va_end( args );
+
+    printf("[Module %u, Line %u, Type %u] %s\n", moduleId, line, type, buffer);
+
+    sErrorCompact_t retValue = { 0 };
+    return retValue;
 }
+
+static sErrorCompact_t fakeCreateErrorCallback( uint16_t errorCode, 
+                                                  uint16_t fileModuleEnum, 
+                                                  uint16_t lineNumber,
+                                                  bool autoStoreError,
+                                                  uint8_t const * const errorMessage, 
+                                                  uint8_t const * const moduleName )
+    {
+        (void)errorCode;
+        (void)fileModuleEnum;
+        (void)lineNumber;
+        (void)autoStoreError;
+        (void)errorMessage;
+        (void)moduleName;
+
+        sErrorCompact_t retValue = BLANK_ERROR_STRUCT;
+        printf("Fake Create Error Callback called with parameters: " );
+        printf("Error Code: %u\n", (unsigned int)errorCode);
+        printf("File Module Enum: %u\n", (unsigned int)fileModuleEnum);
+        printf("Line Number: %u\n", (unsigned int)lineNumber);
+        printf("Auto Store Error: %s\n", autoStoreError ? "true" : "false");
+        printf("Error Message: %s\n", (errorMessage ? errorMessage : "NULL"));
+        printf("Module Name: %s\n", (moduleName ? moduleName : "NULL"));
+        return retValue;
+    }
 
 /**
  * @brief Program Main entry for testing libraries.
@@ -82,12 +118,7 @@ static sErrorCompact_t fakeLogCallback(uint16_t moduleId,
 int main( void )
 {
     int retValue = ERROR_NONE;
-    sErrorCompact_t errorInfo = initErrorDriver(
-        (readMemoryFunctionPtr_t)&fakeReadMemory,
-        (writeMemoryFunctionPtr_t)&fakeWriteMemory,
-        (logCallback_t)&fakeLogCallback,
-        0U,
-        sizeof( gFakeMemory )
-    );
+    sErrorCompact_t errorInfo = initIntegrityDriver( (createErrorCallback_t)&fakeCreateErrorCallback,
+                                     (logCallback_t)&fakeLogCallback );
     return( retValue );
 }

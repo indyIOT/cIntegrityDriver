@@ -52,14 +52,17 @@ typedef enum
                              .xorOut = CRC_16_XOROUT, \
                              .reflectIn = CRC_16_INPUT_REFLECTED, \
                              .reflectOut = CRC_16_OUTPUT_REFLECTED }
+#endif // SCOMMON_CRC_16
 
 /********************************* Integrity Driver Public Interface ********/
 /**
  * @brief Function to initialize the integrity driver. This should be called before any other functions are used.
  * @param createErrorCallback Pointer to a function for creating errors for the integrity driver.
+ * @param logCallback Pointer to a function for logging messages for the integrity driver.
  * @return sErrorCompact_t structure containing the integrity information if an error occurred.
  */
-extern sErrorCompact_t initIntegrityDriver( createErrorCallback_t createErrorCallback );
+extern sErrorCompact_t initIntegrityDriver( createErrorCallback_t createErrorCallback,
+                                            logCallback_t logCallback );
 
 
 /**
@@ -71,9 +74,9 @@ extern sErrorCompact_t initIntegrityDriver( createErrorCallback_t createErrorCal
  * @param length The length of the buffer in bytes.
  * @return The calculated CRC16 value.
  */
-extern uint16_t calculateCRC16( sCRC16Config_t const config, 
-                            uint8_t const * const buffer,
-                            uint16_t const length );
+extern uint16_t calculateCRC16( sCRC16Config_t const * const config,
+                                void const * const buffer,
+                                size_t length );
 /**
  * @brief Function to calculate the CRC16 of a given buffer using an embedded optimized algorithm.
  * @note if Embedded Optimized is set in the configuration then this function will always be used.
@@ -84,18 +87,23 @@ extern uint16_t calculateCRC16( sCRC16Config_t const config,
  * @param length The length of the buffer in bytes.
  * @return The calculated CRC16 value.
  */
-extern uint16_t CRC16TableCCITT_False( uint8_t const * const buffer,
-                                        uint16_t const length,
+extern uint16_t CRC16TableCCITT_False( void const * const buffer,
+                                        size_t const length,
                                         uint16_t const initialCrc );
+
 /**
- * @brief Function to get the error driver information. This will return a structure containing the error driver information.
- * @return sCommonDriverAccessorStruct_t structure containing the error driver information.
+ * @brief Function to get the Integrity driver information. 
+ *        This will return a structure containing accessors to
+ *       get the module ID, version string, and other information 
+ *  about the integrity driver.
+ * @return sCommonDriverAccessorStruct_t Structure containing accessors to 
+ *             get the module ID, version string, and other information about the integrity driver.
  */
-extern sCommonDriverAccessorStruct_t const * const getIntegrityDriverInfo( void );
+extern sCommonDriverAccessorStruct_t const * const getIntegrityDriverInfoAccessors( void );
 
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif
 
 
- #endif /* C_INTEGRITY_DRIVER_H */
+ #endif /* C_INTEGRITY_DRIVER_PUB_H */

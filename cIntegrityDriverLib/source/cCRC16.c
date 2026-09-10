@@ -17,7 +17,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/********************************Static Global Variables **********************/
+/******************************* Static Global Variables **********************/
+static const uint8_t moduleName[] = "cCRC16";
+#define MODULE_ID 56525
+
+
+
 /*
  * crc16_ccitt.c - fast table-driven CRC16-CCITT for embedded
  * Poly 0x1021, init 0xFFFF, no reflection, no final XOR (CCITT-FALSE).
@@ -62,20 +67,20 @@ static const uint16_t crc16_tab[256] = {
 
 /********************************Static Function Prototypes  ******************/
 
-static uint8_t reflect8(uint8_t b);
-static uint16_t reflect16(uint16_t v);
+static uint8_t reflect8( uint8_t b );
+static uint16_t reflect16( uint16_t v );
 
 /**
  * @brief Reflects the bits of an 8-bit value.
  * @param b The 8-bit value to reflect.
  * @return The reflected 8-bit value.
  */
-static uint8_t reflect8(uint8_t b)
+static uint8_t reflect8( uint8_t b )
 {
-    b = (uint8_t)((b & 0xF0u) >> 4 | (b & 0x0Fu) << 4);
-    b = (uint8_t)((b & 0xCCu) >> 2 | (b & 0x33u) << 2);
-    b = (uint8_t)((b & 0xAAu) >> 1 | (b & 0x55u) << 1);
-    return b;
+    b = ( uint8_t )( ( b & 0xF0u ) >> 4 | ( b & 0x0Fu ) << 4 );
+    b = ( uint8_t )( ( b & 0xCCu ) >> 2 | ( b & 0x33u ) << 2 );
+    b = ( uint8_t )( ( b & 0xAAu ) >> 1 | ( b & 0x55u ) << 1 );
+    return ( b );
 }
 
 /**
@@ -83,64 +88,68 @@ static uint8_t reflect8(uint8_t b)
  * @param v The 16-bit value to reflect.
  * @return The reflected 16-bit value.
  */
-static uint16_t reflect16(uint16_t v)
+static uint16_t reflect16( uint16_t v )
 {
     uint16_t r = 0;
-    for (int i = 0; i < 16; i++) {
-        r = (uint16_t)((r << 1) | (v & 1u));
+    for ( int i = 0; i < 16; i++ )
+     {
+        r = ( uint16_t )( ( r << 1 ) | ( v & 1u ) );
         v >>= 1;
     }
-    return r;
+    return ( r );
 }
 
 /**
  * @brief Calculates the CRC16 of a given buffer using the specified configuration.
- * @param cfg Pointer to the CRC16 configuration.
- * @param buf Pointer to the buffer to calculate the CRC16 of.
+ * @param config Pointer to the CRC16 configuration.
+ * @param buffer Pointer to the buffer to calculate the CRC16 of.
  * @param len The length of the buffer in bytes.
  * @return The calculated CRC16 value.
  */
-uint16_t calculateCRC16(const crc16_cfg_t *cfg, const void *buf, size_t len)
+uint16_t calculateCRC16( sCRC16Config_t const * const config, 
+                         void const * const buffer, size_t length )
 {
-    const uint8_t *p = (const uint8_t *)buf;
-    uint16_t crc = cfg->init;
+    uint8_t const * p = ( uint8_t const *)buffer;
+    uint16_t crc = config->init;
     uint8_t byte = 0;
 #if ( EMBEDDED_OPTIMIZED_BUILD != DEF_TRUE )
-    while ( len-- ) 
+    while ( length-- ) 
     {
-        byte = cfg->reflect_in ? reflect8(*p++) : *p++;
-        crc ^= (uint16_t)byte << 8;
-        for (int i = 0; i < 8; i++)
+        byte = config->reflectIn ? reflect8( *p++ ) : *p++;
+        crc ^= ( uint16_t )byte << 8;
+        for ( int i = 0; i < 8; i++ )
         {
-            crc = (crc & 0x8000u) ? (uint16_t)((crc << 1) ^ cfg->poly)
-                                  : (uint16_t)(crc << 1);
+            crc = ( crc & 0x8000u ) ? ( uint16_t )( ( crc << 1 ) ^ config->poly )
+                                  : ( uint16_t )( crc << 1 );
         }
     }
 
-    if (cfg->reflect_out)
+    if ( config->reflectOut )
     {
-        crc = reflect16(crc);
+        crc = reflect16( crc );
     }
     
-    crc ^= cfg->xor_out;
+    crc ^= config->xorOut;
 #else
-    crc = CRC16TableCCITT_False(buf, len, CRC_16_SEED);
+    crc = CRC16TableCCITT_False( buffer, length, CRC_16_SEED );
 #endif
     return ( crc );
 }
 
 /**
  * @brief Calculates the CRC16 of a given buffer using the CCITT-FALSE polynomial.
- * @param buf Pointer to the buffer to calculate the CRC16 of.
- * @param len The length of the buffer in bytes.
+ * @param buffer Pointer to the buffer to calculate the CRC16 of.
+ * @param length The length of the buffer in bytes.
  * @return The calculated CRC16 value. 
  */
-uint16_t CRC16TableCCITT_False(const void *buf, size_t len, uint16_t initialCrc )
+uint16_t CRC16TableCCITT_False( void const * const buffer, 
+                                size_t length, 
+                                uint16_t initialCrc )
 {
-    const uint8_t *p = (const uint8_t *)buf;
+    uint8_t const * p = ( uint8_t const * )buffer;
     uint16_t crc = initialCrc;
 
-    while (len--)
+    while (length--)
     {
         crc = (uint16_t)((crc << 8) ^ crc16_tab[(crc >> 8) ^ *p++]);
     }

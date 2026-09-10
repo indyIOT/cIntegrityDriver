@@ -56,7 +56,8 @@ typedef enum
 
 /********************************* Integrity Driver Public Interface ********/
 /**
- * @brief Function to initialize the integrity driver. This should be called before any other functions are used.
+ * @brief Function to initialize the integrity driver. This should be called 
+ *        before any other functions are used.
  * @param createErrorCallback Pointer to a function for creating errors for the integrity driver.
  * @param logCallback Pointer to a function for logging messages for the integrity driver.
  * @return sErrorCompact_t structure containing the integrity information if an error occurred.

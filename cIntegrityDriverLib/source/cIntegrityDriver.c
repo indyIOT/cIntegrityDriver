@@ -21,12 +21,6 @@ extern "C" {
 
 /******************************** Type definitions ****************************/
 
-typedef struct
-{
-    sCommonDriverControlStruct_t _driverControl; /* Control structure for the Integrity driver */
-    logCallback_t logMessageFunction; /* Pointer to a function for logging information */
-    createErrorCallback_t createErrorFunction; /* Pointer to a function for creating errors */
-} sIntegrityDriverControlStruct_t;
 
 /********************************Static functions Prototypes *************/
 static uint16_t getModuleId( void );
@@ -64,22 +58,58 @@ static sIntegrityDriverControlStruct_t integrityDriverControlStruct = {
     .createErrorFunction = NULL
 };
 
+/************************************Driver wide variables ********************/
+ sIntegrityDriverControlStruct_t * const THIS = &integrityDriverControlStruct;
 
-static sIntegrityDriverControlStruct_t * const THIS = &integrityDriverControlStruct;
 /**************************** HELPER MACROS ************************************/
-#ifndef ERROR_NONE
-#define ERROR_NONE 0U
-#endif
 
-#ifndef NO_ERROR
-#define NO_ERROR 0U
-#endif
-
-#ifndef CREATE_ERROR
-#define CREATE_ERROR( errorCode, errorMessage ) \
-    THIS->createErrorFunction( errorCode, MODULE_ID, __LINE__, false, errorMessage, moduleName )
-#endif
 /****************************** Function implementations ***************/
+/**
+ * @brief Creates an sErrorCompact_t, going through the registered create-error
+ *        callback if the driver has been initialized, or filling the struct
+ *        directly (still complete with a CRC16 over it) if it has not.
+ * @note This exists so CREATE_ERROR is safe to use even when the driver was
+ *       never initialized -- calling straight through THIS->createErrorFunction
+ *       in that state would dereference a null function pointer, since nothing
+ *       has set it yet.
+ * @param errorCode The error code for this error.
+ * @param fileModuleEnum The module ID where the error occurred.
+ * @param lineNumber The source line where the error occurred.
+ * @param errorMessage A message describing the error.
+ * @param callerModuleName The name of the module reporting the error.
+ * @return sErrorCompact_t structure containing the error information.
+ */
+sErrorCompact_t createIntegrityDriverErrorSafe( uint16_t errorCode,
+                                                uint16_t fileModuleEnum,
+                                                uint16_t lineNumber,
+                                                uint8_t const * const errorMessage,
+                                                uint8_t const * const callerModuleName )
+{
+    sErrorCompact_t retValue = BLANK_ERROR_STRUCT;
+    sCRC16Config_t defaultCRC16Config = DEFAULT_CRC16_CONFIG;
+
+    if( THIS->createErrorFunction != NULL )
+    {
+        retValue = THIS->createErrorFunction( errorCode, fileModuleEnum, lineNumber, false, errorMessage, callerModuleName );
+    }
+    else
+    {
+        /* Driver isn't initialized (or createErrorFunction was never set), so
+           there is no registered callback to call through -- fill the struct
+           directly instead of dereferencing a null function pointer. */
+        retValue._errorCode = errorCode;
+        retValue._fileModuleEnum = fileModuleEnum;
+        retValue._lineNumber = lineNumber;
+        retValue._flags = 0;
+        (void)calculateCRC16( &defaultCRC16Config,
+                              (void const *)&retValue,
+                              offsetof( sErrorCompact_t, _crc16 ),
+                              &retValue._crc16 );
+    }
+
+    return ( retValue );
+}
+
 /**
  * @brief Function to initialize the integrity driver. This should be called before any other functions are used.
  * @param createErrorCallback Pointer to a function for creating errors for the integrity driver.
@@ -90,30 +120,29 @@ sErrorCompact_t initIntegrityDriver( createErrorCallback_t createErrorCallback,
                                      logCallback_t logCallback )
 {
     sErrorCompact_t retValue = BLANK_ERROR_STRUCT;
-    sCRC16Config_t defaultCRC16Config = DEFAULT_CRC16_CONFIG;
     if( THIS->_driverControl._driverInfo._isInitialized == false )
     {
-        // If the create error callback is null populate an error manually.
+        // If the create error callback is null populate an error manually
+        // (createIntegrityDriverErrorSafe handles this since createErrorFunction
+        // hasn't been set yet at this point).
         if( createErrorCallback == NULL )
         {
-            retValue._errorCode = ERROR_NULL_POINTER;
-            retValue._fileModuleEnum = MODULE_ID;
-            retValue._lineNumber = __LINE__;
-            retValue._flags = 0;
-            retValue._crc16 = calculateCRC16( &defaultCRC16Config, (void const *)&retValue, offsetof( sErrorCompact_t, _crc16 ) );
+            retValue = CREATE_ERROR( ERROR_NULL_POINTER,
+                                     (uint8_t const *)"Integrity Driver Initialization Failed: Create Error Callback function pointer is NULL." );
             if( logCallback != NULL )
             {
-                (void)logCallback( THIS->_driverControl._driverInfo._moduleID, 
+                (void)logCallback( THIS->_driverControl._driverInfo._moduleID,
                                    __LINE__,
                                    LOGGING_TYPE_CRITICAL,
                                    "Integrity Driver Initialization Failed: Create Error Callback function pointer is NULL." );
-            }      
+            }
         }
         else if( logCallback == NULL )
         {
             if( createErrorCallback != NULL )
             {
-                (void)createErrorCallback( ERROR_NULL_POINTER, MODULE_ID, __LINE__, false, "Integrity Driver Initialization Failed: Log Callback function pointer is NULL.", moduleName );
+                retValue = CREATE_ERROR( ERROR_NULL_POINTER, 
+                                               "Integrity Driver Initialization Failed: Log Callback function pointer is NULL.");
             }      
         }
         else
@@ -131,8 +160,21 @@ sErrorCompact_t initIntegrityDriver( createErrorCallback_t createErrorCallback,
     return ( retValue );
 }
 
+#ifdef UNIT_TESTS
 /**
- * @brief Function to get the Integrity driver information. 
+ * @brief Test-only hook that resets the integrity driver back to an uninitialized state.
+ * @note Compiled only when UNIT_TESTS is defined. See cIntegrityDriverPub.h.
+ */
+void resetIntegrityDriverForTest( void )
+{
+    THIS->_driverControl._driverInfo._isInitialized = false;
+    THIS->logMessageFunction = NULL;
+    THIS->createErrorFunction = NULL;
+}
+#endif
+
+/**
+ * @brief Function to get the Integrity driver information.
  *        This will return a structure containing accessors to
  *       get the module ID, version string, and other information 
  *  about the integrity driver.

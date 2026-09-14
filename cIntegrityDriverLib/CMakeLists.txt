@@ -56,11 +56,15 @@ if( COMPILE_INTEGRITY_DRIVER_LIBRARY_STATIC )
     add_library(${INTEGRITY_DRIVER_LIBRARY_NAME} STATIC
         source/cIntegrityDriver.c
         source/cCRC16.c
+        source/cCRC32.c
+        source/cSHA256.c
     )
 else()
     add_library(${INTEGRITY_DRIVER_LIBRARY_NAME} SHARED
         source/cIntegrityDriver.c
         source/cCRC16.c
+        source/cCRC32.c
+        source/cSHA256.c
     )
 endif()
 
@@ -76,6 +80,17 @@ target_link_libraries(${INTEGRITY_DRIVER_LIBRARY_NAME}
         cCommonMacros
         cCommonTypes
 )
+
+# Propagate UNIT_TESTS as a compile definition (PUBLIC so it also reaches anything
+# that links this library, e.g. cIntegrityDriverTest below) so the test-only reset
+# hook (resetIntegrityDriverForTest) compiles in. It is absent whenever UNIT_TESTS
+# is OFF, so it never ships in a release build.
+if( UNIT_TESTS )
+    target_compile_definitions(${INTEGRITY_DRIVER_LIBRARY_NAME}
+        PUBLIC
+            UNIT_TESTS
+    )
+endif()
 
 # Expose the generated header directory so consumers can #include it
 target_include_directories(${INTEGRITY_DRIVER_LIBRARY_NAME}

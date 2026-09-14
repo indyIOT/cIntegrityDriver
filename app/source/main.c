@@ -7,8 +7,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <cstdarg>   // va_list, va_start, va_end
-#include <cstdio>    // vsnprintf
+#include <string.h>
 #include "commonMacros.h"
 #include "cIntegrityDriverPub.h"
 
@@ -111,14 +110,50 @@ static sErrorCompact_t fakeCreateErrorCallback( uint16_t errorCode,
     }
 
 /**
+ * @brief Placeholder AES stand-in for demo/testing purposes only.
+ * @warning This is NOT real AES. It XORs each byte of the input against a
+ *          repeating key, so calling it a second time with the same key
+ *          recovers the original data. It exists purely to exercise an
+ *          encrypt/decrypt calling pattern until a real AES implementation
+ *          is wired into the library.
+ * @param key Pointer to the key bytes to XOR against.
+ * @param keyLength Length of the key in bytes. Must be non-zero.
+ * @param input Pointer to the input buffer.
+ * @param length Length of the input buffer in bytes.
+ * @param output Pointer to a buffer of at least length bytes to receive the result.
+ */
+static void dummyAesEncrypt( uint8_t const * const key, size_t keyLength,
+                             uint8_t const * const input, size_t length,
+                             uint8_t * const output )
+{
+    size_t i = 0;
+    for ( i = 0; i < length; i++ )
+    {
+        output[i] = ( uint8_t )( input[i] ^ key[i % keyLength] );
+    }
+}
+
+/**
  * @brief Program Main entry for testing libraries.
- * 
- * @return int 
+ *
+ * @return int
  */
 int main( void )
 {
     int retValue = ERROR_NONE;
+    static uint8_t const dummyAesKey[] = { 0xDEU, 0xADU, 0xBEU, 0xEFU };
+    static uint8_t const plaintext[] = "Attack at dawn";
+    uint8_t ciphertext[sizeof( plaintext )] = { 0 };
+    uint8_t decrypted[sizeof( plaintext )] = { 0 };
     sErrorCompact_t errorInfo = initIntegrityDriver( (createErrorCallback_t)&fakeCreateErrorCallback,
                                      (logCallback_t)&fakeLogCallback );
+
+    /* Demonstrate the placeholder AES round trip: encrypt, then "decrypt" by
+       encrypting the ciphertext again (XOR is its own inverse). */
+    dummyAesEncrypt( dummyAesKey, sizeof( dummyAesKey ), plaintext, sizeof( plaintext ), ciphertext );
+    dummyAesEncrypt( dummyAesKey, sizeof( dummyAesKey ), ciphertext, sizeof( plaintext ), decrypted );
+    printf( "Dummy AES plaintext:  %s\n", plaintext );
+    printf( "Dummy AES round trip: %s\n", decrypted );
+
     return( retValue );
 }

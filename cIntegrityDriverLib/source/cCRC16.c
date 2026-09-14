@@ -11,8 +11,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "commonTypes.h"
+#include "commonMacros.h"
 #include "cIntegrityDriverConfig.h"
 #include "cIntegrityDriverPub.h"
+#include "cIntegrityDriver.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,40 +102,56 @@ static uint16_t reflect16( uint16_t v )
 }
 
 /**
- * @brief Calculates the CRC16 of a given buffer using the specified configuration.
+ * @brief Calculates the CRC16 of a given buffer using the specified 
+ *        configuration.
+ * @note passing in a null pointer for buffer should be allowed because
+ *  some crc calculations are could be calculated over the first address in
+ * 
  * @param config Pointer to the CRC16 configuration.
  * @param buffer Pointer to the buffer to calculate the CRC16 of.
  * @param len The length of the buffer in bytes.
- * @return The calculated CRC16 value.
+ * @param crc16Value Pointer to the location where the calculated CRC16 value will be stored.
+ * @return The error code indicating the success or failure of the operation.
  */
-uint16_t calculateCRC16( sCRC16Config_t const * const config, 
-                         void const * const buffer, size_t length )
+sErrorCompact_t calculateCRC16( sCRC16Config_t const * const config, 
+                         void const * const buffer, size_t length, 
+                         uint16_t * const crc16Value )
 {
     uint8_t const * p = ( uint8_t const *)buffer;
-    uint16_t crc = config->init;
+    uint16_t crc = 0;
     uint8_t byte = 0;
+    sErrorCompact_t retValue = BLANK_ERROR_STRUCT;
+    if( ( config == NULL )  || ( crc16Value == NULL ) )
+    {
+        retValue = CREATE_ERROR( ERROR_NULL_POINTER, moduleName );
+    }
+    else
+    {
+        crc = config->init;
 #if ( EMBEDDED_OPTIMIZED_BUILD != DEF_TRUE )
-    while ( length-- ) 
-    {
-        byte = config->reflectIn ? reflect8( *p++ ) : *p++;
-        crc ^= ( uint16_t )byte << 8;
-        for ( int i = 0; i < 8; i++ )
+        while ( length-- ) 
         {
-            crc = ( crc & 0x8000u ) ? ( uint16_t )( ( crc << 1 ) ^ config->poly )
-                                  : ( uint16_t )( crc << 1 );
+            byte = config->reflectIn ? reflect8( *p++ ) : *p++;
+            crc ^= ( uint16_t )byte << 8;
+            for ( int i = 0; i < 8; i++ )
+            {
+                crc = ( crc & 0x8000u ) ? ( uint16_t )( ( crc << 1 ) ^ config->poly )
+                                    : ( uint16_t )( crc << 1 );
+            }
         }
-    }
 
-    if ( config->reflectOut )
-    {
-        crc = reflect16( crc );
-    }
+        if ( config->reflectOut )
+        {
+            crc = reflect16( crc );
+        }
     
-    crc ^= config->xorOut;
+        crc ^= config->xorOut;
 #else
     crc = CRC16TableCCITT_False( buffer, length, CRC_16_SEED );
 #endif
-    return ( crc );
+        *crc16Value = crc;
+    }
+    return ( retValue );
 }
 
 /**

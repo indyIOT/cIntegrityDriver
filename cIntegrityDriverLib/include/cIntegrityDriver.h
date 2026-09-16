@@ -58,7 +58,7 @@ extern sErrorCompact_t createIntegrityDriverErrorSafe( uint16_t errorCode,
 
 #ifndef CREATE_ERROR
 #define CREATE_ERROR( errorCode, errorMessage ) \
-    createIntegrityDriverErrorSafe( errorCode, MODULE_ID, __LINE__, errorMessage, moduleName )
+    createIntegrityDriverErrorSafe( errorCode, MODULE_ID, __LINE__, errorMessage, moduleName ) 
 #endif
 
 #ifdef __cplusplus

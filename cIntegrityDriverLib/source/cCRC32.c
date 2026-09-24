@@ -134,7 +134,7 @@ extern sErrorCompact_t calculateCRC32( sCRC32Config_t const * const config,
     uint8_t byte = 0;
     if( ( config == NULL ) || ( crc32Value == NULL ) )
     {
-        retValue = CREATE_ERROR( ERROR_NULL_POINTER, moduleName );
+        retValue = CREATE_ERROR( ERROR_NULL_POINTER, NULL );
     }
     else
     {

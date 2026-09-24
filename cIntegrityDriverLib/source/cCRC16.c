@@ -123,7 +123,7 @@ sErrorCompact_t calculateCRC16( sCRC16Config_t const * const config,
     sErrorCompact_t retValue = BLANK_ERROR_STRUCT;
     if( ( config == NULL )  || ( crc16Value == NULL ) )
     {
-        retValue = CREATE_ERROR( ERROR_NULL_POINTER, moduleName );
+        retValue = CREATE_ERROR( ERROR_NULL_POINTER, NULL );
     }
     else
     {

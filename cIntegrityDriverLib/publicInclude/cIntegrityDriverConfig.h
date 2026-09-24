@@ -25,6 +25,18 @@ extern "C" {
 #define CRC_16_EMBEDDED_OPTIMIZED_CRC16                                 DEF_FALSE
 #endif
 
+#ifndef INTEGRITY_LOGGING_ENABLED
+#define INTEGRITY_LOGGING_ENABLED                                                DEF_TRUE
+#endif
+
+#ifndef LOG_FULL_ERROR_MESSAGE
+#define LOG_FULL_ERROR_MESSAGE                                               DEF_TRUE
+#endif
+
+#ifndef ERROR_MESSAGE_FULL
+#define ERROR_MESSAGE_FULL                                                   DEF_TRUE
+#endif
+
 #endif // CUSTOM_INTEGRITY_DRIVER_CONFIG
 
 #ifdef __cplusplus

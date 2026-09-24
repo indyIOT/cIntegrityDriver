@@ -18,13 +18,13 @@
 
 <!-- PROJECT Title -->
 <div align="center">
-<h3 align="center">cErrorDriver</h3>
+<h3 align="center">cIntegrityDriver</h3>
   <p align="center">
-    A library used by my personal projects to allow for error storage and logging. 
+    A library used by my personal projects to allow for integrity checking of different structures and streams.
     <br />
-    <a href="https://github.com/indyIOT/cErrorDriver/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/indyIOT/cIntegrityDriver/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
-    <a href="https://github.com/indyIOT/cErrorDriver/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/indyIOT/cIntegrityDriver/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -84,7 +84,7 @@ You need a c standard tool chain with CMake installed.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/indyIOT/cErrorDriver.git
+   git clone https://github.com/indyIOT/cIntegrityDriver.git
    ```
 3. Run Make
    ```sh
@@ -98,7 +98,7 @@ You need a c standard tool chain with CMake installed.
    ```
 5. Change git remote url to avoid accidental pushes to base project
    ```sh
-   git remote set-url origin indyIOT/cErrorDriver
+   git remote set-url origin indyIOT/cIntegrityDriver
    git remote -v # confirm the changes
    ```
 
@@ -114,8 +114,8 @@ You need a c standard tool chain with CMake installed.
 <!-- Top Contributors -->
 ## Top Contributors
 
-<a href="https://github.com/indyIOT/cErrorDriver/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=indyIOT/cErrorDriver" alt="contrib.rocks image" />
+<a href="https://github.com/indyIOT/cIntegrityDriver/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=indyIOT/cIntegrityDriver" alt="contrib.rocks image" />
 </a>
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -135,22 +135,22 @@ Distributed under the project_license. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Project Link: [https://github.com/indyIOT/cErrorDriver](https://github.com/indyIOT/cErrorDriver)
+Project Link: [https://github.com/indyIOT/cIntegrityDriver](https://github.com/indyIOT/cIntegrityDriver)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/indyIOT/cErrorDriver.svg?style=for-the-badge
-[contributors-url]: https://github.com/indyIOT/cErrorDriver/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/indyIOT/cErrorDriver.svg?style=for-the-badge
-[forks-url]: https://github.com/indyIOT/cErrorDriver/network/members
-[stars-shield]: https://img.shields.io/github/stars/indyIOT/cErrorDriver.svg?style=for-the-badge
-[stars-url]: https://github.com/indyIOT/cErrorDriver/stargazers
-[issues-shield]: https://img.shields.io/github/issues/indyIOT/cErrorDriver.svg?style=for-the-badge
-[issues-url]: https://github.com/indyIOT/cErrorDriver/issues
-[license-shield]: https://img.shields.io/github/license/indyIOT/cErrorDriver.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/indyIOT/cIntegrityDriver.svg?style=for-the-badge
+[contributors-url]: https://github.com/indyIOT/cIntegrityDriver/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/indyIOT/cIntegrityDriver.svg?style=for-the-badge
+[forks-url]: https://github.com/indyIOT/cIntegrityDriver/network/members
+[stars-shield]: https://img.shields.io/github/stars/indyIOT/cIntegrityDriver.svg?style=for-the-badge
+[stars-url]: https://github.com/indyIOT/cIntegrityDriver/stargazers
+[issues-shield]: https://img.shields.io/github/issues/indyIOT/cIntegrityDriver.svg?style=for-the-badge
+[issues-url]: https://github.com/indyIOT/cIntegrityDriver/issues
+[license-shield]: https://img.shields.io/github/license/indyIOT/cIntegrityDriver.svg?style=for-the-badge
 [license-url]: https://github.com/indyIOT/cAlgoImplementations/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/anthonygarza2020

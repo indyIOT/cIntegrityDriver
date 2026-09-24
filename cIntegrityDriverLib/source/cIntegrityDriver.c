@@ -54,7 +54,9 @@ static sIntegrityDriverControlStruct_t integrityDriverControlStruct = {
                             .getModuleVersionFunction = getModuleVersion,
                             .isDriverInitializedFunction = isDriverInitialized },
     },
+#if ( INTEGRITY_LOGGING_ENABLED == DEF_TRUE )
     .logMessageFunction = NULL,
+#endif
     .createErrorFunction = NULL
 };
 
@@ -128,7 +130,8 @@ sErrorCompact_t initIntegrityDriver( createErrorCallback_t createErrorCallback,
         if( createErrorCallback == NULL )
         {
             retValue = CREATE_ERROR( ERROR_NULL_POINTER,
-                                     (uint8_t const *)"Integrity Driver Initialization Failed: Create Error Callback function pointer is NULL." );
+                                     NULL);
+#if ( INTEGRITY_LOGGING_ENABLED == DEF_TRUE )
             if( logCallback != NULL )
             {
                 (void)logCallback( THIS->_driverControl._driverInfo._moduleID,
@@ -136,19 +139,24 @@ sErrorCompact_t initIntegrityDriver( createErrorCallback_t createErrorCallback,
                                    LOGGING_TYPE_CRITICAL,
                                    "Integrity Driver Initialization Failed: Create Error Callback function pointer is NULL." );
             }
+#endif
         }
+#if ( INTEGRITY_LOGGING_ENABLED == DEF_TRUE )
         else if( logCallback == NULL )
         {
             if( createErrorCallback != NULL )
             {
                 retValue = CREATE_ERROR( ERROR_NULL_POINTER, 
-                                               "Integrity Driver Initialization Failed: Log Callback function pointer is NULL.");
+                                         NULL );
             }      
         }
+#endif
         else
         {
             THIS->createErrorFunction = createErrorCallback;
+#if ( INTEGRITY_LOGGING_ENABLED == DEF_TRUE )
             THIS->logMessageFunction = logCallback;
+#endif
             THIS->_driverControl._driverInfo._isInitialized = true;
         }
     }

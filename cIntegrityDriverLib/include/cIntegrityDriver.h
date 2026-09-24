@@ -18,7 +18,9 @@ extern "C" {
 typedef struct
 {
     sCommonDriverControlStruct_t _driverControl; /* Control structure for the Integrity driver */
+#if ( INTEGRITY_LOGGING_ENABLED == DEF_TRUE )
     logCallback_t logMessageFunction; /* Pointer to a function for logging information */
+#endif
     createErrorCallback_t createErrorFunction; /* Pointer to a function for creating errors */
 } sIntegrityDriverControlStruct_t;
 
